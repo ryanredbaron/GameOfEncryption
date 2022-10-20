@@ -3,18 +3,19 @@ import pygame
 import numpy as np
 from PIL import Image, ImageFont, ImageDraw
 
+#-----------------------------------------------
+TextPassword = 'P@assw3rd!'
+Iterations = 100
+ColumnSaltLocations = [4,8,12]
+#-----------------------------------------------
+
 col_about_to_die = (200, 200, 225)
 col_alive = (255, 255, 215)
 col_background = (10, 10, 40)
 col_grid = (30, 30, 60)
 
-#-----------------------------------------------
-TextPassword = 'Password'
-Iterations = 100
-FontType = 'arialbd.ttf'
-FontSize = 15
-#-----------------------------------------------
-
+Salt = [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0]
+      
 def update(surface, cur, sz):
     nxt = np.zeros((cur.shape[0], cur.shape[1]))
 
@@ -60,29 +61,29 @@ def init(dimx, dimy):
                     [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
                     [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
                     ]);
-    font = ImageFont.truetype(FontType, FontSize)
+    font = ImageFont.truetype('arialbd.ttf', 15)
     size = font.getsize(TextPassword)
     image = Image.new('1', size, 1)
     draw = ImageDraw.Draw(image)
     draw.text((0, 0), TextPassword, font=font)
 
     CryptRowCounter = 0
-    for rownum in range(size[1]): 
-        line = []
+    for rownum in range(size[1]):
         CryptColumnCounter = 0
         for colnum in range(size[0]):
             if image.getpixel((colnum, rownum)): 
-                line.append('0'),
                 pattern[CryptRowCounter][CryptColumnCounter] = '0'
             else: 
-                line.append('1'),
                 pattern[CryptRowCounter][CryptColumnCounter] = '1'
             CryptColumnCounter+=1
+        for ColumnLocation in ColumnSaltLocations :
+            if ColumnLocation == CryptRowCounter:
+                pattern[CryptRowCounter] =  Salt
         CryptRowCounter += 1
 
     cells = np.zeros((dimy, dimx))
 
-    pos = (3,3)
+    pos = (35,0)
     cells[pos[0]:pos[0]+pattern.shape[0], pos[1]:pos[1]+pattern.shape[1]] = pattern
     return cells
 
@@ -91,8 +92,8 @@ def main(dimx, dimy, cellsize):
     pygame.init()
     surface = pygame.display.set_mode((dimx * cellsize, dimy * cellsize))
     pygame.display.set_caption("Game of Encryption")
+    clock = pygame.time.Clock()
 
-    
     cells = init(dimx, dimy)
     Continue = True
     while Continue == True:
@@ -102,16 +103,18 @@ def main(dimx, dimy, cellsize):
                 return
         surface.fill(col_grid)
         cells = update(surface, cells, cellsize)
+        pygame.display.set_caption(str(clock.get_fps()))
         pygame.display.update()
+        clock.tick(1000)
+        
         if(IterationCounter == 0):
-            input("Press Enter to start")
+            pygame.image.save(surface, r"C:\Users\ryanr\Desktop\Before.jpg")
+            pygame.time.delay(1000)
         IterationCounter+=1
         if(IterationCounter == Iterations):
-            input("Press Enter to exit")
+            pygame.image.save(surface, r"C:\Users\ryanr\Desktop\After.jpg")
+            pygame.time.delay(1000)
             Continue = False
-        
-        
-
 
 if __name__ == "__main__":
-    main(100, 30, 8)
+    main(100, 100, 8)
